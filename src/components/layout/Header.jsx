@@ -13,8 +13,10 @@ function Header() {
     <header style={{ padding: "16px", borderBottom: "1px solid #ddd" }}>
       <nav style={{ display: "flex", gap: "12px" }}>
         <Link to="/stores">가게 목록</Link>
+        <Link to="/stores/new">가게 등록</Link>
         <Link to="/orders">내 주문</Link>
         <Link to="/payments">결제</Link>
+
         {!isLoggedIn() ? (
           <>
             <Link to="/signup">회원가입</Link>
