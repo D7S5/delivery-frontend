@@ -12,6 +12,7 @@ import Header from "./components/layout/Header";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import CreateMenuPage from "./pages/CreateMenuPage";
 import CreateStorePage from "./pages/CreateStorePage";
+import CartPage from "./pages/CartPage";
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/stores" element={<StoreListPage />} />
         <Route path="/stores/:storeId" element={<StoreDetailPage />} />
+
+        <Route path="/cart" element={<CartPage />} />
 
         <Route
           path="/stores/new"
