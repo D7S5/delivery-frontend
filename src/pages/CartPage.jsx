@@ -6,38 +6,63 @@ import {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
-  getCartTotalPrice,
-} from "../utils/cartStorage";
+} from "../api/cartApi";
 
 function CartPage() {
   const navigate = useNavigate();
 
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(null);
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
 
-  const loadCart = () => {
-    setCart(getCart());
+  const fetchCart = async () => {
+    try {
+      const result = await getCart();
+      setCart(result);
+    } catch (error) {
+      alert(error.response?.data?.message || "장바구니 조회 실패");
+    }
   };
 
   useEffect(() => {
-    loadCart();
+    fetchCart();
   }, []);
 
-  const handleQuantityChange = (menuId, storeId, value) => {
-    const quantity = Number(value);
-    updateCartItemQuantity(menuId, storeId, quantity < 1 || isNaN(quantity) ? 1 : quantity);
-    loadCart();
+  const handleQuantityChange = async (cartItemId, value) => {
+    try {
+      const quantity = Number(value);
+
+      await updateCartItemQuantity(cartItemId, {
+        quantity: quantity < 1 || isNaN(quantity) ? 1 : quantity,
+      });
+
+      fetchCart();
+    } catch (error) {
+      alert(error.response?.data?.message || "수량 변경 실패");
+    }
   };
 
-  const handleRemove = (menuId, storeId) => {
-    removeCartItem(menuId, storeId);
-    loadCart();
+  const handleRemove = async (cartItemId) => {
+    try {
+      await removeCartItem(cartItemId);
+      fetchCart();
+    } catch (error) {
+      alert(error.response?.data?.message || "항목 삭제 실패");
+    }
+  };
+
+  const handleClearCart = async () => {
+    try {
+      await clearCart();
+      fetchCart();
+    } catch (error) {
+      alert(error.response?.data?.message || "장바구니 비우기 실패");
+    }
   };
 
   const handleOrder = async () => {
     try {
-      if (cart.length === 0) {
+      if (!cart || !cart.items || cart.items.length === 0) {
         alert("장바구니가 비어 있습니다.");
         return;
       }
@@ -47,20 +72,12 @@ function CartPage() {
         return;
       }
 
-      const firstStoreId = cart[0].storeId;
-      const isSameStore = cart.every((item) => item.storeId === firstStoreId);
-
-      if (!isSameStore) {
-        alert("한 번에 같은 가게 메뉴만 주문할 수 있습니다.");
-        return;
-      }
-
       const payload = {
-        storeId: cart[0].storeId,
-        storeName: cart[0].storeName,
+        storeId: cart.storeId,
+        storeName: cart.storeName,
         deliveryAddress: address,
         requestMessage: message,
-        items: cart.map((item) => ({
+        items: cart.items.map((item) => ({
           menuId: item.menuId,
           menuName: item.menuName,
           menuPrice: item.menuPrice,
@@ -69,8 +86,8 @@ function CartPage() {
       };
 
       const result = await createOrder(payload);
-      console.log(result.data)
-      clearCart();
+      await clearCart();
+
       alert("주문 생성 완료");
       navigate(`/orders/${result.data.orderId}`);
     } catch (error) {
@@ -78,19 +95,27 @@ function CartPage() {
     }
   };
 
+  if (!cart) {
+    return <div style={{ padding: "24px" }}>로딩 중...</div>;
+  }
+
+  const isEmpty = !cart.items || cart.items.length === 0;
+
   return (
     <div style={{ padding: "24px" }}>
       <h1>장바구니</h1>
 
-      {cart.length === 0 ? (
+      {isEmpty ? (
         <p>장바구니가 비어 있습니다.</p>
       ) : (
         <>
+          <h3>가게: {cart.storeName}</h3>
+
           <ul>
-            {cart.map((item) => (
-              <li key={`${item.storeId}-${item.menuId}`} style={{ marginBottom: "16px" }}>
+            {cart.items.map((item) => (
+              <li key={item.cartItemId} style={{ marginBottom: "16px" }}>
                 <div>
-                  [{item.storeName}] {item.menuName} / {item.menuPrice}원
+                  {item.menuName} / {item.menuPrice}원
                 </div>
 
                 <div style={{ marginTop: "8px" }}>
@@ -99,16 +124,16 @@ function CartPage() {
                     min="1"
                     value={item.quantity}
                     onChange={(e) =>
-                      handleQuantityChange(item.menuId, item.storeId, e.target.value)
+                      handleQuantityChange(item.cartItemId, e.target.value)
                     }
                     style={{ width: "60px", marginRight: "8px" }}
                   />
 
                   <span style={{ marginRight: "8px" }}>
-                    소계: {item.menuPrice * item.quantity}원
+                    소계: {item.subTotal}원
                   </span>
 
-                  <button onClick={() => handleRemove(item.menuId, item.storeId)}>
+                  <button onClick={() => handleRemove(item.cartItemId)}>
                     삭제
                   </button>
                 </div>
@@ -118,7 +143,7 @@ function CartPage() {
 
           <hr />
 
-          <h3>총 금액: {getCartTotalPrice()}원</h3>
+          <h3>총 금액: {cart.totalPrice}원</h3>
 
           <div style={{ marginTop: "16px", marginBottom: "16px" }}>
             <input
@@ -138,14 +163,8 @@ function CartPage() {
           <button onClick={handleOrder} style={{ marginRight: "8px" }}>
             전체 주문하기
           </button>
-          <button
-            onClick={() => {
-              clearCart();
-              loadCart();
-            }}
-          >
-            장바구니 비우기
-          </button>
+
+          <button onClick={handleClearCart}>장바구니 비우기</button>
         </>
       )}
     </div>

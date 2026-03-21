@@ -1,11 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { isLoggedIn, removeAccessToken } from "../../utils/token";
+import { clearCart } from "../../utils/cartStorage";
 
 function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     removeAccessToken();
+    clearCart();
     navigate("/login");
   };
 

@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getStoreDetail } from "../../src/api/storeApi";
-import {
-  addToCart,
-  clearCart,
-  hasDifferentStoreInCart,
-} from "../../src/utils/cartStorage";
+import { getStoreDetail } from "../api/storeApi";
+import { addCartItem } from "../api/cartApi";
 
 function StoreDetailPage() {
   const { storeId } = useParams();
@@ -50,35 +46,67 @@ function StoreDetailPage() {
     }));
   };
 
-  const handleAddToCart = (menu) => {
-    const quantity = quantities[menu.id] || 1;
-
-    const newCartItem = {
-      storeId: detail.store.id,
-      storeName: detail.store.name,
-      menuId: menu.id,
-      menuName: menu.name,
-      menuPrice: menu.price,
-      quantity,
-    };
-
-    const hasDifferentStore = hasDifferentStoreInCart(detail.store.id);
-
-    if (hasDifferentStore) {
-      const ok = window.confirm(
-        "이미 다른 가게 상품이 장바구니에 있습니다.\n기존 장바구니를 비우고 새로 담으시겠습니까?"
-      );
-
-      if (!ok) return;
-
-      clearCart();
+  const handleAddToCart = async (menu) => {
+    if (!detail || !detail.store) {
+      alert("가게 정보가 없습니다.");
+      return;
     }
 
-    addToCart(newCartItem);
-    alert("장바구니에 담았습니다.");
+    try {
+      const quantity = quantities[menu.id] || 1;
+
+      const payload = {
+        storeId: detail.store.id,
+        storeName: detail.store.name,
+        menuId: menu.id,
+        menuName: menu.name,
+        menuPrice: menu.price,
+        quantity,
+        replace: false,
+      };
+
+      await addCartItem(payload);
+      alert("장바구니에 담았습니다.");
+    } catch (error) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+
+      if (status === 409) {
+        const ok = window.confirm(
+          "이미 다른 가게 상품이 장바구니에 있습니다.\n기존 장바구니를 비우고 새로 담으시겠습니까?"
+        );
+
+        if (!ok) return;
+
+        try {
+          const quantity = quantities[menu.id] || 1;
+
+          const payload = {
+            storeId: detail.store.id,
+            storeName: detail.store.name,
+            menuId: menu.id,
+            menuName: menu.name,
+            menuPrice: menu.price,
+            quantity,
+            replace: true,
+          };
+
+          await addCartItem(payload);
+          alert("기존 장바구니를 비우고 새로 담았습니다.");
+        } catch (retryError) {
+          alert(retryError.response?.data?.message || "장바구니 담기 실패");
+        }
+
+        return;
+      }
+
+      alert(message || "장바구니 담기 실패");
+    }
   };
 
-  if (!detail) return <div style={{ padding: "24px" }}>로딩 중...</div>;
+  if (!detail) {
+    return <div style={{ padding: "24px" }}>로딩 중...</div>;
+  }
 
   return (
     <div style={{ padding: "24px" }}>
