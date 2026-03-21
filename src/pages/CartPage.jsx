@@ -69,6 +69,7 @@ function CartPage() {
       };
 
       const result = await createOrder(payload);
+      console.log(result.data)
       clearCart();
       alert("주문 생성 완료");
       navigate(`/orders/${result.data.orderId}`);

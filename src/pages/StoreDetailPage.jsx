@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStoreDetail } from "../../src/api/storeApi";
-import { addToCart } from "../../src/utils/cartStorage";
+import {
+  addToCart,
+  clearCart,
+  hasDifferentStoreInCart,
+} from "../../src/utils/cartStorage";
 
 function StoreDetailPage() {
   const { storeId } = useParams();
@@ -49,15 +53,28 @@ function StoreDetailPage() {
   const handleAddToCart = (menu) => {
     const quantity = quantities[menu.id] || 1;
 
-    addToCart({
+    const newCartItem = {
       storeId: detail.store.id,
       storeName: detail.store.name,
       menuId: menu.id,
       menuName: menu.name,
       menuPrice: menu.price,
       quantity,
-    });
+    };
 
+    const hasDifferentStore = hasDifferentStoreInCart(detail.store.id);
+
+    if (hasDifferentStore) {
+      const ok = window.confirm(
+        "이미 다른 가게 상품이 장바구니에 있습니다.\n기존 장바구니를 비우고 새로 담으시겠습니까?"
+      );
+
+      if (!ok) return;
+
+      clearCart();
+    }
+
+    addToCart(newCartItem);
     alert("장바구니에 담았습니다.");
   };
 
@@ -91,7 +108,6 @@ function StoreDetailPage() {
                 onChange={(e) => handleQuantityChange(menu.id, e.target.value)}
                 style={{ width: "60px", marginRight: "8px" }}
               />
-
               <button onClick={() => handleAddToCart(menu)}>
                 장바구니 담기
               </button>
