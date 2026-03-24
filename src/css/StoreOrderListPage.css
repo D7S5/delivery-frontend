@@ -1,0 +1,112 @@
+.store-order-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #f7f7f8;
+  min-height: 100vh;
+}
+
+.store-order-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.empty-box {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  color: #666;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.order-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.status {
+  margin-top: 8px;
+  color: #444;
+  font-weight: 600;
+}
+
+.order-body p {
+  margin: 8px 0;
+  color: #333;
+}
+
+.item-box {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+
+.item-box ul {
+  margin: 10px 0 0 18px;
+  padding: 0;
+}
+
+.order-footer {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-btn.preparing {
+  background: #ffb703;
+  color: white;
+}
+
+.action-btn.delivery {
+  background: #3a86ff;
+  color: white;
+}
+
+.action-btn.complete {
+  background: #2a9d8f;
+  color: white;
+}
+
+.action-btn.cancel {
+  background: #e63946;
+  color: white;
+}
+
+.action-btn.done,
+.action-btn.canceled {
+  background: #d9d9d9;
+  color: #666;
+  cursor: not-allowed;
+}

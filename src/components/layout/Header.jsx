@@ -18,6 +18,7 @@ function Header() {
         <Link to="/stores/new">가게 등록</Link>
         <Link to="/orders">내 주문</Link>
         <Link to="/payments">결제</Link>
+        <Link to="/store/orders">가게 주문 관리</Link>
 
         {!isLoggedIn() ? (
           <>

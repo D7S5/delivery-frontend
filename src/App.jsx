@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import CreateMenuPage from "./pages/CreateMenuPage";
 import CreateStorePage from "./pages/CreateStorePage";
 import CartPage from "./pages/CartPage";
+import StoreOrderListPage from "./pages/StoreOrderListPage";
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
         <Route path="/stores/:storeId" element={<StoreDetailPage />} />
 
         <Route path="/cart" element={<CartPage />} />
+
+        <Route path="/store/orders" element={<StoreOrderListPage />} />
 
         <Route
           path="/stores/new"

@@ -19,3 +19,13 @@ export const createMenu = async (storeId, payload) => {
   const response = await api.post(`/api/stores/${storeId}/menus`, payload);
   return response.data;
 };
+
+export const updateMenu = async (storeId, menuId, payload) => {
+  const response = await api.put(`/api/stores/${storeId}/menus/${menuId}`, payload);
+  return response.data;
+};
+
+export const deleteMenu = async (storeId, menuId) => {
+  const response = await api.delete(`/api/stores/${storeId}/menus/${menuId}`);
+  return response.data;
+};
