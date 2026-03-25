@@ -14,6 +14,7 @@ import CreateMenuPage from "./pages/CreateMenuPage";
 import CreateStorePage from "./pages/CreateStorePage";
 import CartPage from "./pages/CartPage";
 import StoreOrderListPage from "./pages/StoreOrderListPage";
+import EditMenuPage from "./pages/EditMenuPage";
 
 function App() {
   return (
@@ -43,6 +44,15 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateMenuPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/stores/:storeId/menus/:menuId/edit"
+          element={
+            <ProtectedRoute>
+              <EditMenuPage />
             </ProtectedRoute>
           }
         />

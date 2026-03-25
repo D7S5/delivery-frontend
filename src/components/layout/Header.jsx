@@ -1,15 +1,23 @@
 import { Link, useNavigate } from "react-router-dom";
 import { isLoggedIn, removeAccessToken } from "../../utils/token";
 import { clearCart } from "../../utils/cartStorage";
+import { logout } from "../../api/authApi";
 
 function Header() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    removeAccessToken();
-    clearCart();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("로그아웃 요청 실패:", error);
+    } finally {
+      removeAccessToken();
+      clearCart();
+      navigate("/login");
+    }
   };
+
 
   return (
     <header style={{ padding: "16px", borderBottom: "1px solid #ddd" }}>

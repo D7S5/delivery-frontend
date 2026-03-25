@@ -8,6 +8,7 @@ export const getAccessToken = () => {
 
 export const removeAccessToken = () => {
   localStorage.removeItem("accessToken");
+  localStorage.removeItem("userId");
 };
 
 export const isLoggedIn = () => {
