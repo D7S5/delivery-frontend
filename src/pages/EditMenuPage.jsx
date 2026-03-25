@@ -81,7 +81,7 @@ function EditMenuPage() {
   }
 
   return (
-    <div>
+    <div className="page-container">
       <h1>메뉴 수정</h1>
 
       <form onSubmit={handleSubmit}>
