@@ -1,13 +1,214 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* 전체 기본 설정 */
+* {
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f8;
+  color: #222;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 공통 레이아웃 */
+.page-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+/* 헤더 */
+header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 14px 24px;
+}
+
+header nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+header nav a,
+header nav button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f1f3f5;
+  color: #222;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+header nav a:hover,
+header nav button:hover {
+  background-color: #e2e6ea;
+}
+
+/* 공통 폼 */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+/* 버튼 */
+button {
+  padding: 11px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2f6feb;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #2459bc;
+}
+
+button.secondary {
+  background-color: #6c757d;
+}
+
+button.secondary:hover {
+  background-color: #565e64;
+}
+
+button.danger {
+  background-color: #dc3545;
+}
+
+button.danger:hover {
+  background-color: #b52a37;
+}
+
+/* 버튼 가로 정렬 */
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 리스트 */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-item {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.card-item p {
+  margin: 6px 0;
+}
+
+/* 메뉴 수량 입력 + 버튼 */
+.inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qty-input {
+  width: 80px;
+}
+
+/* 품절 표시 */
+.sold-out {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background-color: #ffe5e5;
+  color: #d63333;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 로그인/회원가입 페이지 */
+.auth-page {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 작은 안내문 */
+.helper-text {
+  font-size: 13px;
+  color: #666;
+}
+
+/* 모바일 */
+@media (max-width: 768px) {
+  .page-container {
+    margin: 16px;
+    padding: 16px;
+  }
+
+  header {
+    padding: 12px 16px;
+  }
+
+  header nav {
+    gap: 8px;
+  }
 }
