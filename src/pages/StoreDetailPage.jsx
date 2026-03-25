@@ -122,7 +122,7 @@ function StoreDetailPage() {
   }
 
   return (
-    <div>
+    <div className="page-container">
       <h1>{detail.store.name}</h1>
 
       <button onClick={moveToCreateMenuPage}>메뉴 등록하러 가기</button>
