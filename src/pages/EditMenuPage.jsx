@@ -111,7 +111,7 @@ function EditMenuPage() {
 
         <div style={{ marginTop: "12px" }}>
           <label>메뉴 설명</label>
-          <br />
+          <br />  
           <textarea
             name="description"
             value={form.description}

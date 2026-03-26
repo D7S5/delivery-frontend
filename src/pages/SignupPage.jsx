@@ -40,6 +40,7 @@ function SignupPage() {
         <select name="role" value={form.role} onChange={handleChange}>
           <option value="CUSTOMER">CUSTOMER</option>
           <option value="OWNER">OWNER</option>
+          <option value="RIDER">RIDER</option>
         </select>
         <button type="submit">회원가입</button>
       </form>
