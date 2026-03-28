@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import {
-  getRiderOrders,
-  startDeliveryByRider,
-  completeDeliveryByRider,
-} from "../api/riderOrderApi";
+  getMyStoreOrders,
+  startPreparingOrder,
+  markReadyForDelivery,
+  cancelStoreOrder,
+} from "../api/storeOrderApi";
 import "../css/StoreOrderListPage.css";
 
-function RiderOrderListPage() {
+function RiderStoreListPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const result = await getRiderOrders();
+      const result = await getMyStoreOrders();
       setOrders(result.data || []);
     } catch (error) {
-      alert(error.response?.data?.message || "라이더 주문 목록 조회 실패");
+      alert(error.response?.data?.message || "주문 목록 조회 실패");
     } finally {
       setLoading(false);
     }
@@ -26,23 +27,36 @@ function RiderOrderListPage() {
     fetchOrders();
   }, []);
 
-  const handleStartDelivery = async (orderReceiveId) => {
+  const handlePreparing = async (orderReceiveId) => {
     try {
-      await startDeliveryByRider(orderReceiveId);
-      alert("배달이 시작되었습니다.");
+      await startPreparingOrder(orderReceiveId);
+      alert("주문이 준비중으로 변경되었습니다.");
       fetchOrders();
     } catch (error) {
-      alert(error.response?.data?.message || "배달 시작 실패");
+      alert(error.response?.data?.message || "주문 준비 상태 변경 실패");
     }
   };
 
-  const handleCompleteDelivery = async (orderReceiveId) => {
+  const handleReady = async (orderReceiveId) => {
     try {
-      await completeDeliveryByRider(orderReceiveId);
-      alert("배달이 완료되었습니다.");
+      await markReadyForDelivery(orderReceiveId);
+      alert("배달 준비 완료 상태로 변경되었습니다.");
       fetchOrders();
     } catch (error) {
-      alert(error.response?.data?.message || "배달 완료 실패");
+      alert(error.response?.data?.message || "배달 준비 완료 상태 변경 실패");
+    }
+  };
+
+  const handleCancel = async (orderReceiveId) => {
+    const ok = window.confirm("정말 주문을 취소하시겠습니까?");
+    if (!ok) return;
+
+    try {
+      await cancelStoreOrder(orderReceiveId);
+      alert("주문이 취소되었습니다.");
+      fetchOrders();
+    } catch (error) {
+      alert(error.response?.data?.message || "주문 취소 실패");
     }
   };
 
@@ -52,10 +66,10 @@ function RiderOrderListPage() {
 
   return (
     <div className="store-order-page">
-      <h1 className="store-order-title">라이더 주문 관리</h1>
+      <h1 className="store-order-title">가게 주문 관리</h1>
 
       {orders.length === 0 ? (
-        <div className="empty-box">배달할 주문이 없습니다.</div>
+        <div className="empty-box">들어온 주문이 없습니다.</div>
       ) : (
         <div className="order-list">
           {orders.map((order) => (
@@ -88,32 +102,41 @@ function RiderOrderListPage() {
 
               <div className="order-footer">
                 {order.status === "RECEIVE_ORDER" && (
-                  <button className="action-btn done" disabled>
-                    아직 가게가 주문을 준비하지 않았습니다
-                  </button>
+                  <>
+                    <button
+                      className="action-btn preparing"
+                      onClick={() => handlePreparing(order.id)}
+                    >
+                      주문을 준비합니다
+                    </button>
+
+                    <button
+                      className="action-btn cancel"
+                      onClick={() => handleCancel(order.id)}
+                    >
+                      주문 취소
+                    </button>
+                  </>
                 )}
 
                 {order.status === "PREPARING" && (
-                  <button className="action-btn done" disabled>
-                    가게가 준비 중입니다
+                  <button
+                    className="action-btn ready"
+                    onClick={() => handleReady(order.id)}
+                  >
+                    조리 완료 / 라이더 배차 요청
                   </button>
                 )}
 
                 {order.status === "READY_FOR_DELIVERY" && (
-                  <button
-                    className="action-btn delivery"
-                    onClick={() => handleStartDelivery(order.id)}
-                  >
-                    배달 시작
+                  <button className="action-btn done" disabled>
+                    라이더 배차 중입니다
                   </button>
                 )}
 
                 {order.status === "DELIVERY" && (
-                  <button
-                    className="action-btn complete"
-                    onClick={() => handleCompleteDelivery(order.id)}
-                  >
-                    배달 완료
+                  <button className="action-btn done" disabled>
+                    라이더가 배달 중입니다
                   </button>
                 )}
 
@@ -137,4 +160,4 @@ function RiderOrderListPage() {
   );
 }
 
-export default RiderOrderListPage;
+export default RiderStoreListPage;

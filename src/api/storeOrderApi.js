@@ -18,6 +18,11 @@ export const startPreparingOrder = async (orderReceiveId) => {
   return response.data;
 };
 
+export const markReadyForDelivery = async (orderReceiveId) => {
+  const response = await api.patch(`/api/store/orders/${orderReceiveId}/ready`);
+  return response.data;
+};
+
 // 준비중 -> 배달중
 export const startDeliveryOrder = async (orderReceiveId) => {
   const response = await api.patch(`/api/store/orders/${orderReceiveId}/delivery`);

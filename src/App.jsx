@@ -15,7 +15,8 @@ import CreateStorePage from "./pages/CreateStorePage";
 import CartPage from "./pages/CartPage";
 import StoreOrderListPage from "./pages/StoreOrderListPage";
 import EditMenuPage from "./pages/EditMenuPage";
-import RiderOrderListPage from "./pages/RIderOrderListPage";
+import RiderOrderListPage from "./pages/RiderOrderListPage";
+import RiderStoreListPage from "./pages/RiderStoreListPage";
 
 function App() {
   return (
@@ -89,6 +90,14 @@ function App() {
           element={
             <ProtectedRoute>
               <RiderOrderListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/store/riderOrders"
+          element={
+            <ProtectedRoute>
+              <RiderStoreListPage/>
             </ProtectedRoute>
           }
         />
