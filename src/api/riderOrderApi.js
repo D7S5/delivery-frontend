@@ -12,7 +12,25 @@ export const acceptRiderOrder = async (assignmentId) => {
   return response.data;
 };
 
-// `/api/rider/orders/${orderReceiveId}/accept`
+export const getRiderMyStatus = async () => {
+  const response = await api.get("/api/riders/me/status");
+  return response.data;
+};
+
+
+export const setRiderOnline = async (lat, lng) => {
+  const response = await api.put("/api/riders/me/online", {
+    lat,
+    lng,
+  });
+  return response.data;
+};
+
+export const setRiderOffline = async () => {
+  const response = await api.p("/api/riders/me/offline");
+  return response.data;
+};
+
 
 // 내가 수락한 배달 목록 조회 (선택)
 export const getMyRiderOrders = async () => {
@@ -23,18 +41,5 @@ export const getMyRiderOrders = async () => {
 // 배달 완료 처리 (선택)
 export const completeRiderOrder = async (assignmentId) => {
   const response = await api.put(`/api/rider/dispatch/${assignmentId}/complete`);
-  return response.data;
-};
-
-export const setRiderOnline = async (lat, lng) => {
-  const response = await api.post("/api/rider/online", {
-    lat,
-    lng,
-  });
-  return response.data;
-};
-
-export const setRiderOffline = async () => {
-  const response = await api.post("/api/rider/offline");
   return response.data;
 };
