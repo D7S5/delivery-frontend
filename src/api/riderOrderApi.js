@@ -7,10 +7,12 @@ export const getAvailableRiderOrders = async () => {
 };
 
 // 라이더가 주문 수락
-export const acceptRiderOrder = async (orderReceiveId) => {
-  const response = await api.patch(`/api/rider/orders/${orderReceiveId}/accept`);
+export const acceptRiderOrder = async (assignmentId) => {
+  const response = await api.put(`/api/rider/dispatch/${assignmentId}/accept`);
   return response.data;
 };
+
+// `/api/rider/orders/${orderReceiveId}/accept`
 
 // 내가 수락한 배달 목록 조회 (선택)
 export const getMyRiderOrders = async () => {
@@ -19,8 +21,8 @@ export const getMyRiderOrders = async () => {
 };
 
 // 배달 완료 처리 (선택)
-export const completeRiderOrder = async (orderReceiveId) => {
-  const response = await api.patch(`/api/rider/orders/${orderReceiveId}/complete`);
+export const completeRiderOrder = async (assignmentId) => {
+  const response = await api.put(`/api/rider/dispatch/${assignmentId}/complete`);
   return response.data;
 };
 
