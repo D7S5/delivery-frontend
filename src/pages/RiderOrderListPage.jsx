@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getAvailableRiderOrders,
   acceptRiderOrder,
@@ -7,6 +7,7 @@ import {
   setRiderOnline,
   setRiderOffline,
   getRiderMyStatus,
+  updateRiderLocation,
 } from "../api/riderOrderApi";
 import "../css/RiderOrderListPage.css";
 
@@ -20,6 +21,8 @@ function RiderOrderListPage() {
   const [riderOnline, setRiderOnlineState] = useState(false);
   const [riderStatus, setRiderStatus] = useState("OFFLINE");
   const [statusChanging, setStatusChanging] = useState(false);
+
+  const watchIdRef = useRef(null);
 
   const fetchRiderStatus = async () => {
     try {
@@ -80,57 +83,98 @@ function RiderOrderListPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // 온라인 상태일 때 위치 추적 시작
+  useEffect(() => {
+    if (!riderOnline || !navigator.geolocation) {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      return;
+    }
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          await updateRiderLocation(lat, lng);
+          console.log("위치 업데이트 성공", lat, lng);
+        } catch (error) {
+          console.error("위치 업데이트 실패", error);
+        }
+      },
+      (error) => {
+        console.error("위치 추적 실패", error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 10000,
+      }
+    );
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [riderOnline]);
+
   const handleOnline = async () => {
     try {
       setStatusChanging(true);
 
-      const success = (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        setRiderOnline(lat, lng)
-          .then(async () => {
-            await fetchRiderStatus();
-            alert("라이더가 온라인 상태로 전환되었습니다.");
-          })
-          .catch((error) => {
-            alert(error.response?.data?.message || "온라인 전환 실패");
-          })
-          .finally(() => {
-            setStatusChanging(false);
-          });
-      };
-
-      const fail = async () => {
-        try {
-          await setRiderOnline(37.5665, 126.9780);
-          await fetchRiderStatus();
-          alert("위치 권한이 없어 기본 좌표로 온라인 전환했습니다.");
-        } catch (error) {
-          alert(error.response?.data?.message || "온라인 전환 실패");
-          setStatusChanging(false);
-        } finally {
-        }
-      };
-
       if (!navigator.geolocation) {
-        await fail();
+        alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
         return;
       }
 
-      navigator.geolocation.getCurrentPosition(success, fail, {
-        enableHighAccuracy: true,
-        timeout: 5000,
-      });
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            console.log("실제 위치 전송", lat, lng);
+
+            await setRiderOnline(lat, lng);
+            await fetchRiderStatus();
+            alert("라이더가 온라인 상태로 전환되었습니다.");
+          } catch (error) {
+            alert(error.response?.data?.message || "온라인 전환 실패");
+          } finally {
+            setStatusChanging(false);
+          }
+        },
+        (error) => {
+          console.error("위치 조회 실패", error);
+          alert("위치 권한을 허용해야 온라인 전환이 가능합니다.");
+          setStatusChanging(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
     } catch (error) {
-      setStatusChanging(false);
+      console.error(error);
       alert("온라인 전환 실패");
+      setStatusChanging(false);
     }
   };
 
   const handleOffline = async () => {
     try {
       setStatusChanging(true);
+
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+
       await setRiderOffline();
       await fetchRiderStatus();
       alert("라이더가 오프라인 상태로 전환되었습니다.");
@@ -165,17 +209,10 @@ function RiderOrderListPage() {
       setCompletingId(orderReceiveId);
       await completeRiderOrder(orderReceiveId);
 
-      setCompletedOrderIds((prev) => [...prev, orderReceiveId]);
-      setMyOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderReceiveId
-            ? { ...order, status: "COMPLETED" }
-            : order
-        )
-      );
+      setMyOrders((prev) => prev.filter((order) => order.id !== orderReceiveId));
 
-      await fetchAll();
       alert("배달 완료 처리되었습니다.");
+      await fetchAll();
     } catch (error) {
       alert(error.response?.data?.message || "배달 완료 처리 실패");
     } finally {
@@ -283,10 +320,7 @@ function RiderOrderListPage() {
                   <button
                     className="action-btn accept"
                     onClick={() => handleAccept(order.id)}
-                    disabled={
-                      acceptingId === order.id ||
-                      riderStatus !== "ONLINE"
-                    }
+                    disabled={acceptingId === order.id || riderStatus !== "ONLINE"}
                   >
                     {acceptingId === order.id ? "수락 중..." : "주문 수락"}
                   </button>
@@ -307,15 +341,25 @@ function RiderOrderListPage() {
         ) : (
           <div className="order-list">
             {myOrders.map((order) => {
-              const isCompleted = completedOrderIds.includes(order.id);
+              const isCompleted =
+                completedOrderIds.includes(order.id) || order.status === "COMPLETED";
+
+              const statusLabel =
+                order.status === "COMPLETED"
+                  ? "배달 완료"
+                  : order.status === "DELIVERING"
+                  ? "배달 중"
+                  : order.status === "DELIVERY"
+                  ? "배달 중"
+                  : order.status;
 
               return (
                 <div className="order-card" key={order.id}>
                   <div className="order-header">
                     <div>
                       <h3>주문번호 #{order.orderId}</h3>
-                      <p className="status delivering">
-                        상태: {order.status || "DELIVERY"}
+                      <p className={`status ${isCompleted ? "done" : "delivering"}`}>
+                        상태: {statusLabel || "배달 중"}
                       </p>
                     </div>
                   </div>
@@ -339,15 +383,11 @@ function RiderOrderListPage() {
                         onClick={() => handleComplete(order.id)}
                         disabled={completingId === order.id || isCompleted}
                       >
-                        {completingId === order.id
-                          ? "처리 중..."
-                          : isCompleted
-                          ? "배달 완료됨"
-                          : "배달 완료"}
+                        {completingId === order.id ? "처리 중..." : "배달 완료"}
                       </button>
                     ) : (
                       <button className="action-btn done" disabled>
-                        {order.status}
+                        {statusLabel}
                       </button>
                     )}
                   </div>

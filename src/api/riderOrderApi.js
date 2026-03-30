@@ -13,13 +13,13 @@ export const acceptRiderOrder = async (assignmentId) => {
 };
 
 export const getRiderMyStatus = async () => {
-  const response = await api.get("/api/riders/me/status");
+  const response = await api.get("/api/rider/me/status");
   return response.data;
 };
 
 
 export const setRiderOnline = async (lat, lng) => {
-  const response = await api.put("/api/riders/me/online", {
+  const response = await api.put("/api/rider/me/online", {
     lat,
     lng,
   });
@@ -27,7 +27,7 @@ export const setRiderOnline = async (lat, lng) => {
 };
 
 export const setRiderOffline = async () => {
-  const response = await api.p("/api/riders/me/offline");
+  const response = await api.put("/api/rider/me/offline");
   return response.data;
 };
 
@@ -41,5 +41,13 @@ export const getMyRiderOrders = async () => {
 // 배달 완료 처리 (선택)
 export const completeRiderOrder = async (assignmentId) => {
   const response = await api.put(`/api/rider/dispatch/${assignmentId}/complete`);
+  return response.data;
+};
+
+export const updateRiderLocation = async (lat, lng) => {
+  const response = await api.put("/api/rider/me/location", {
+    lat,
+    lng,
+  });
   return response.data;
 };
