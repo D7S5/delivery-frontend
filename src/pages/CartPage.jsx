@@ -7,6 +7,7 @@ import {
   removeCartItem,
   clearCart,
 } from "../api/cartApi";
+import PageLayout from "../components/layout/PageLayout";
 
 function CartPage() {
   const navigate = useNavigate();
@@ -89,85 +90,105 @@ function CartPage() {
       await clearCart();
 
       alert("주문 생성 완료");
-      navigate(`/orders/${result.data.orderId}`);
+      navigate(`/orders/${result.orderId}`);
     } catch (error) {
       alert(error.response?.data?.message || "주문 생성 실패");
     }
   };
 
   if (!cart) {
-    return <div style={{ padding: "24px" }}>로딩 중...</div>;
+    return <div className="loading-box">장바구니를 불러오는 중입니다.</div>;
   }
 
   const isEmpty = !cart.items || cart.items.length === 0;
 
   return (
-    <div style={{ padding: "24px" }}>
-      <h1>장바구니</h1>
-
+    <PageLayout
+      eyebrow="Cart"
+      title="주문 전 마지막 확인"
+      description="장바구니 수량을 조정하고 배달 주소와 요청사항을 입력한 뒤 주문을 생성할 수 있습니다."
+    >
       {isEmpty ? (
-        <p>장바구니가 비어 있습니다.</p>
+        <section className="empty-state">
+          <strong>장바구니가 비어 있습니다.</strong>
+          <p>매장 상세 화면에서 메뉴를 담으면 이곳에서 주문을 이어갈 수 있습니다.</p>
+        </section>
       ) : (
-        <>
-          <h3>가게: {cart.storeName}</h3>
+        <section className="detail-grid">
+          <article className="surface-card">
+            <span className="tag">{cart.storeName}</span>
+            <h2>담아둔 메뉴</h2>
+            <ul className="cart-list">
+              {cart.items.map((item) => (
+                <li className="menu-card" key={item.cartItemId}>
+                  <div className="menu-header">
+                    <div>
+                      <h3>{item.menuName}</h3>
+                      <p className="menu-meta">개당 {Number(item.menuPrice).toLocaleString()}원</p>
+                    </div>
+                    <strong className="menu-price">{Number(item.subTotal).toLocaleString()}원</strong>
+                  </div>
 
-          <ul>
-            {cart.items.map((item) => (
-              <li key={item.cartItemId} style={{ marginBottom: "16px" }}>
-                <div>
-                  {item.menuName} / {item.menuPrice}원
-                </div>
+                  <div className="inline-row">
+                    <input
+                      className="qty-input"
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => handleQuantityChange(item.cartItemId, e.target.value)}
+                    />
+                    <button className="danger" onClick={() => handleRemove(item.cartItemId)}>
+                      삭제
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </article>
 
-                <div style={{ marginTop: "8px" }}>
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(item.cartItemId, e.target.value)
-                    }
-                    style={{ width: "60px", marginRight: "8px" }}
-                  />
+          <aside className="surface-card stack-md">
+            <div>
+              <span className="tag">Order Summary</span>
+              <h2>주문 정보</h2>
+            </div>
 
-                  <span style={{ marginRight: "8px" }}>
-                    소계: {item.subTotal}원
-                  </span>
+            <div className="summary-box">
+              <div className="summary-row">
+                <span>총 금액</span>
+                <strong>{Number(cart.totalPrice).toLocaleString()}원</strong>
+              </div>
+            </div>
 
-                  <button onClick={() => handleRemove(item.cartItemId)}>
-                    삭제
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+            <div className="field-row">
+              <label htmlFor="delivery-address">배달 주소</label>
+              <input
+                id="delivery-address"
+                placeholder="배달 주소를 입력하세요"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
 
-          <hr />
+            <div className="field-row">
+              <label htmlFor="delivery-message">요청사항</label>
+              <input
+                id="delivery-message"
+                placeholder="예: 문 앞에 두고 가주세요"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
 
-          <h3>총 금액: {cart.totalPrice}원</h3>
-
-          <div style={{ marginTop: "16px", marginBottom: "16px" }}>
-            <input
-              placeholder="배달 주소"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              style={{ display: "block", marginBottom: "8px", width: "320px" }}
-            />
-            <input
-              placeholder="요청사항"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              style={{ display: "block", width: "320px" }}
-            />
-          </div>
-
-          <button onClick={handleOrder} style={{ marginRight: "8px" }}>
-            전체 주문하기
-          </button>
-
-          <button onClick={handleClearCart}>장바구니 비우기</button>
-        </>
+            <div className="button-group">
+              <button onClick={handleOrder}>전체 주문하기</button>
+              <button className="ghost" onClick={handleClearCart}>
+                장바구니 비우기
+              </button>
+            </div>
+          </aside>
+        </section>
       )}
-    </div>
+    </PageLayout>
   );
 }
 

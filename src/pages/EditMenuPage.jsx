@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getStoreDetail, updateMenu } from "../api/storeApi";
+import PageLayout from "../components/layout/PageLayout";
 
 function EditMenuPage() {
   const { storeId, menuId } = useParams();
@@ -19,7 +20,7 @@ function EditMenuPage() {
     const fetchMenu = async () => {
       try {
         const result = await getStoreDetail(storeId);
-        const menus = result.data?.menus || [];
+        const menus = result?.menus || [];
 
         const targetMenu = menus.find(
           (menu) => String(menu.id) === String(menuId)
@@ -77,54 +78,57 @@ function EditMenuPage() {
   };
 
   if (loading) {
-    return <div>로딩 중...</div>;
+    return <div className="loading-box">메뉴 정보를 불러오는 중입니다.</div>;
   }
 
   return (
-    <div className="page-container">
-      <h1>메뉴 수정</h1>
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>메뉴 이름</label>
-          <br />
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="메뉴 이름"
-          />
-        </div>
-
-        <div style={{ marginTop: "12px" }}>
-          <label>가격</label>
-          <br />
-          <input
-            type="number"
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="가격"
-          />
-        </div>
-
-        <div style={{ marginTop: "12px" }}>
-          <label>메뉴 설명</label>
-          <br />  
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="메뉴 설명"
-            rows={4}
-            cols={40}
-          />
-        </div>
-
-        <div style={{ marginTop: "12px" }}>
-          <label>
+    <PageLayout
+      eyebrow="Owner Tools"
+      title="메뉴 수정"
+      description="메뉴 정보와 품절 상태를 함께 관리할 수 있습니다."
+      narrow
+    >
+      <section className="surface-card form-card">
+        <form onSubmit={handleSubmit}>
+          <div className="field-row">
+            <label htmlFor="edit-menu-name">메뉴 이름</label>
             <input
+              id="edit-menu-name"
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="메뉴 이름"
+            />
+          </div>
+
+          <div className="field-row">
+            <label htmlFor="edit-menu-price">가격</label>
+            <input
+              id="edit-menu-price"
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              placeholder="가격"
+            />
+          </div>
+
+          <div className="field-row">
+            <label htmlFor="edit-menu-description">메뉴 설명</label>
+            <textarea
+              id="edit-menu-description"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="메뉴 설명"
+              rows={4}
+            />
+          </div>
+
+          <label className="checkbox-row" htmlFor="edit-menu-sold-out">
+            <input
+              id="edit-menu-sold-out"
               type="checkbox"
               name="soldOut"
               checked={form.soldOut}
@@ -132,20 +136,20 @@ function EditMenuPage() {
             />
             품절 여부
           </label>
-        </div>
 
-        <div style={{ marginTop: "16px" }}>
-          <button type="submit">수정 완료</button>
-          <button
-            type="button"
-            onClick={() => navigate(`/stores/${storeId}`)}
-            style={{ marginLeft: "8px" }}
-          >
-            취소
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="button-group">
+            <button type="submit">수정 완료</button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={() => navigate(`/stores/${storeId}`)}
+            >
+              취소
+            </button>
+          </div>
+        </form>
+      </section>
+    </PageLayout>
   );
 }
 

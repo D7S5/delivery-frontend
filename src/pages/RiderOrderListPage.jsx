@@ -17,7 +17,6 @@ function RiderOrderListPage() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
-  const [completedOrderIds, setCompletedOrderIds] = useState([]);
   const [riderOnline, setRiderOnlineState] = useState(false);
   const [riderStatus, setRiderStatus] = useState("OFFLINE");
   const [statusChanging, setStatusChanging] = useState(false);
@@ -27,7 +26,7 @@ function RiderOrderListPage() {
   const fetchRiderStatus = async () => {
     try {
       const result = await getRiderMyStatus();
-      const data = result?.data;
+      const data = result;
 
       if (data) {
         setRiderStatus(data.status);
@@ -48,13 +47,13 @@ function RiderOrderListPage() {
       ]);
 
       if (availableResult.status === "fulfilled") {
-        setAvailableOrders(availableResult.value?.data || []);
+        setAvailableOrders(availableResult.value || []);
       } else {
         setAvailableOrders([]);
       }
 
       if (myResult.status === "fulfilled") {
-        setMyOrders(myResult.value?.data || []);
+        setMyOrders(myResult.value || []);
       } else {
         setMyOrders([]);
       }
@@ -73,14 +72,53 @@ function RiderOrderListPage() {
   };
 
   useEffect(() => {
-    fetchAll();
+    let active = true;
+
+    const refreshPage = async (showLoading = false) => {
+      try {
+        if (showLoading && active) {
+          setLoading(true);
+        }
+
+        const [availableResult, myResult, riderStatusResult] = await Promise.allSettled([
+          getAvailableRiderOrders(),
+          getMyRiderOrders(),
+          getRiderMyStatus(),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        setAvailableOrders(
+          availableResult.status === "fulfilled" ? availableResult.value || [] : []
+        );
+        setMyOrders(myResult.status === "fulfilled" ? myResult.value || [] : []);
+
+        if (riderStatusResult.status === "fulfilled" && riderStatusResult.value) {
+          setRiderStatus(riderStatusResult.value.status);
+          setRiderOnlineState(riderStatusResult.value.online);
+        } else {
+          setRiderStatus("OFFLINE");
+          setRiderOnlineState(false);
+        }
+      } finally {
+        if (showLoading && active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    refreshPage(true);
 
     const interval = setInterval(() => {
-      fetchOrders();
-      fetchRiderStatus();
+      refreshPage();
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // 온라인 상태일 때 위치 추적 시작
@@ -341,8 +379,7 @@ function RiderOrderListPage() {
         ) : (
           <div className="order-list">
             {myOrders.map((order) => {
-              const isCompleted =
-                completedOrderIds.includes(order.id) || order.status === "COMPLETED";
+              const isCompleted = order.status === "COMPLETED";
 
               const statusLabel =
                 order.status === "COMPLETED"

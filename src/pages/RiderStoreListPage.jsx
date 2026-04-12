@@ -15,7 +15,7 @@ function RiderStoreListPage() {
     try {
       setLoading(true);
       const result = await getMyStoreOrders();
-      setOrders(result.data || []);
+      setOrders(result || []);
     } catch (error) {
       alert(error.response?.data?.message || "주문 목록 조회 실패");
     } finally {

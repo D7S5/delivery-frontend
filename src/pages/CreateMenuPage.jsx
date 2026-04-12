@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createMenu } from "../api/storeApi";
+import PageLayout from "../components/layout/PageLayout";
 
 function CreateMenuPage() {
   const { storeId } = useParams();
@@ -41,44 +42,52 @@ function CreateMenuPage() {
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <h1>메뉴 등록</h1>
-      <p>가게 ID: {storeId}</p>
+    <PageLayout
+      eyebrow="Owner Tools"
+      title="새 메뉴 등록"
+      description={`가게 ID ${storeId}에 연결될 메뉴 정보를 입력합니다.`}
+      narrow
+    >
+      <section className="surface-card form-card">
+        <form onSubmit={handleSubmit}>
+          <div className="field-row">
+            <label htmlFor="menu-name">메뉴 이름</label>
+            <input
+              id="menu-name"
+              name="name"
+              placeholder="메뉴 이름"
+              value={form.name}
+              onChange={handleChange}
+            />
+          </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          maxWidth: "400px",
-        }}
-      >
-        <input
-          name="name"
-          placeholder="메뉴 이름"
-          value={form.name}
-          onChange={handleChange}
-        />
+          <div className="field-row">
+            <label htmlFor="menu-price">가격</label>
+            <input
+              id="menu-price"
+              name="price"
+              type="number"
+              placeholder="가격"
+              value={form.price}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          name="price"
-          type="number"
-          placeholder="가격"
-          value={form.price}
-          onChange={handleChange}
-        />
+          <div className="field-row">
+            <label htmlFor="menu-description">메뉴 설명</label>
+            <input
+              id="menu-description"
+              name="description"
+              placeholder="메뉴 설명"
+              value={form.description}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          name="description"
-          placeholder="메뉴 설명"
-          value={form.description}
-          onChange={handleChange}
-        />
-
-        <button type="submit">메뉴 등록</button>
-      </form>
-    </div>
+          <button type="submit">메뉴 등록</button>
+        </form>
+      </section>
+    </PageLayout>
   );
 }
 
